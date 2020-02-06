@@ -2,14 +2,10 @@ package com.pichillilorenzo.flutter_inappwebview.InAppWebView;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Build;
-import android.print.PrintAttributes;
-import android.print.PrintDocumentAdapter;
-import android.print.PrintManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,14 +16,6 @@ import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebHistoryItem;
 import android.webkit.WebSettings;
-import android.webkit.WebStorage;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.ListView;
-
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 
 import com.pichillilorenzo.flutter_inappwebview.ContentBlocker.ContentBlocker;
 import com.pichillilorenzo.flutter_inappwebview.ContentBlocker.ContentBlockerAction;
@@ -37,8 +25,6 @@ import com.pichillilorenzo.flutter_inappwebview.FlutterWebView;
 import com.pichillilorenzo.flutter_inappwebview.InAppBrowserActivity;
 import com.pichillilorenzo.flutter_inappwebview.InAppWebViewFlutterPlugin;
 import com.pichillilorenzo.flutter_inappwebview.JavaScriptBridgeInterface;
-import com.pichillilorenzo.flutter_inappwebview.R;
-import com.pichillilorenzo.flutter_inappwebview.Shared;
 import com.pichillilorenzo.flutter_inappwebview.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -47,18 +33,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 import okhttp3.OkHttpClient;
 
-import static com.pichillilorenzo.flutter_inappwebview.InAppWebView.PreferredContentModeOptionType.fromValue;
+import static com.pichillilorenzo.flutter_inappwebview.InAppWebView.PreferredContentModeOptionType.*;
 
 final public class InAppWebView extends InputAwareWebView {
 
   static final String LOG_TAG = "InAppWebView";
 
+  public PluginRegistry.Registrar registrar;
   public InAppBrowserActivity inAppBrowserActivity;
   public FlutterWebView flutterWebView;
   public int id;
@@ -70,7 +56,6 @@ final public class InAppWebView extends InputAwareWebView {
   public float scale = getResources().getDisplayMetrics().density;
   int okHttpClientCacheSize = 10 * 1024 * 1024; // 10MB
   public ContentBlockerHandler contentBlockerHandler = new ContentBlockerHandler();
-  public Pattern regexToCancelSubFramesLoadingCompiled;
 
   static final String consoleLogJS = "(function(console) {" +
           "   var oldLogs = {" +
@@ -97,10 +82,6 @@ final public class InAppWebView extends InputAwareWebView {
           "       })(k);" +
           "   }" +
           "})(window.console);";
-
-  static final String printJS = "window.print = function() {" +
-          "  window." + JavaScriptBridgeInterface.name + ".callHandler('onPrint', window.location.href);" +
-          "}";
 
   static final String platformReadyJS = "window.dispatchEvent(new Event('flutterInAppWebViewPlatformReady'));";
 
@@ -514,6 +495,7 @@ final public class InAppWebView extends InputAwareWebView {
           "  };" +
           "})(window.fetch);";
 
+
   public InAppWebView(Context context) {
     super(context);
   }
@@ -526,8 +508,9 @@ final public class InAppWebView extends InputAwareWebView {
     super(context, attrs, defaultStyle);
   }
 
-  public InAppWebView(Context context, Object obj, int id, InAppWebViewOptions options, View containerView) {
+  public InAppWebView(PluginRegistry.Registrar registrar, Context context, Object obj, int id, InAppWebViewOptions options, View containerView) {
     super(context, containerView);
+    this.registrar = registrar;
     if (obj instanceof InAppBrowserActivity)
       this.inAppBrowserActivity = (InAppBrowserActivity) obj;
     else if (obj instanceof FlutterWebView)
@@ -543,13 +526,16 @@ final public class InAppWebView extends InputAwareWebView {
 
   public void prepare() {
 
+    final Activity activity = (inAppBrowserActivity != null) ? inAppBrowserActivity : registrar.activity();
+
     boolean isFromInAppBrowserActivity = inAppBrowserActivity != null;
 
+    //httpClient = new OkHttpClient().newBuilder().cache(new Cache(getContext().getCacheDir(), okHttpClientCacheSize)).build();
     httpClient = new OkHttpClient().newBuilder().build();
 
     addJavascriptInterface(new JavaScriptBridgeInterface((isFromInAppBrowserActivity) ? inAppBrowserActivity : flutterWebView), JavaScriptBridgeInterface.name);
 
-    inAppWebViewChromeClient = new InAppWebViewChromeClient((isFromInAppBrowserActivity) ? inAppBrowserActivity : flutterWebView);
+    inAppWebViewChromeClient = new InAppWebViewChromeClient((isFromInAppBrowserActivity) ? inAppBrowserActivity : flutterWebView, this.registrar);
     setWebChromeClient(inAppWebViewChromeClient);
 
     inAppWebViewClient = new InAppWebViewClient((isFromInAppBrowserActivity) ? inAppBrowserActivity : flutterWebView);
@@ -567,7 +553,7 @@ final public class InAppWebView extends InputAwareWebView {
     settings.setJavaScriptCanOpenWindowsAutomatically(options.javaScriptCanOpenWindowsAutomatically);
     settings.setBuiltInZoomControls(options.builtInZoomControls);
     settings.setDisplayZoomControls(options.displayZoomControls);
-    settings.setSupportMultipleWindows(options.supportMultipleWindows);
+    settings.setSupportMultipleWindows(options.useOnTargetBlank);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
       settings.setSafeBrowsingEnabled(options.safeBrowsingEnabled);
@@ -576,7 +562,9 @@ final public class InAppWebView extends InputAwareWebView {
 
     settings.setDatabaseEnabled(options.databaseEnabled);
     settings.setDomStorageEnabled(options.domStorageEnabled);
-
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+    }
     if (options.userAgent != null && !options.userAgent.isEmpty())
       settings.setUserAgentString(options.userAgent);
     else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -584,7 +572,7 @@ final public class InAppWebView extends InputAwareWebView {
 
     if (options.applicationNameForUserAgent != null && !options.applicationNameForUserAgent.isEmpty()) {
       if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-        String userAgent = (options.userAgent != null && !options.userAgent.isEmpty()) ? options.userAgent : WebSettings.getDefaultUserAgent(getContext());
+        String userAgent = (options.userAgent != null && !options.userAgent.isEmpty()) ? options.userAgent :WebSettings.getDefaultUserAgent(getContext());
         String userAgentWithApplicationName = userAgent + " " + options.applicationNameForUserAgent;
         settings.setUserAgentString(userAgentWithApplicationName);
       }
@@ -668,9 +656,6 @@ final public class InAppWebView extends InputAwareWebView {
       setLayerType(View.LAYER_TYPE_HARDWARE, null);
     else
       setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-    if (options.regexToCancelSubFramesLoading != null) {
-      regexToCancelSubFramesLoadingCompiled = Pattern.compile(options.regexToCancelSubFramesLoading);
-    }
 
     contentBlockerHandler.getRuleList().clear();
     for (Map<String, Map<String, Object>> contentBlocker : options.contentBlockers) {
@@ -695,7 +680,7 @@ final public class InAppWebView extends InputAwareWebView {
 
     setVerticalScrollBarEnabled(!options.disableVerticalScroll);
     setHorizontalScrollBarEnabled(!options.disableHorizontalScroll);
-    setOnTouchListener(new View.OnTouchListener() {
+    setOnTouchListener(new OnTouchListener() {
       float m_downX;
       float m_downY;
 
@@ -818,7 +803,7 @@ final public class InAppWebView extends InputAwareWebView {
 
   public void loadFile(String url, MethodChannel.Result result) {
     try {
-      url = Util.getUrlAsset(url);
+      url = Util.getUrlAsset(registrar, url);
     } catch (IOException e) {
       result.error(LOG_TAG, url + " asset file cannot be found!", e);
       return;
@@ -835,7 +820,7 @@ final public class InAppWebView extends InputAwareWebView {
 
   public void loadFile(String url, Map<String, String> headers, MethodChannel.Result result) {
     try {
-      url = Util.getUrlAsset(url);
+      url = Util.getUrlAsset(registrar, url);
     } catch (IOException e) {
       result.error(LOG_TAG, url + " asset file cannot be found!", e);
       return;
@@ -871,7 +856,6 @@ final public class InAppWebView extends InputAwareWebView {
     clearCache(true);
     clearCookies();
     clearFormData();
-    WebStorage.getInstance().deleteAllData();
   }
 
   public void takeScreenshot(final MethodChannel.Result result) {
@@ -1012,8 +996,8 @@ final public class InAppWebView extends InputAwareWebView {
       if (newOptionsMap.get("mixedContentMode") != null && !options.mixedContentMode.equals(newOptions.mixedContentMode))
         settings.setMixedContentMode(newOptions.mixedContentMode);
 
-    if (newOptionsMap.get("supportMultipleWindows") != null && options.supportMultipleWindows != newOptions.supportMultipleWindows)
-      settings.setSupportMultipleWindows(newOptions.supportMultipleWindows);
+    if (newOptionsMap.get("useOnTargetBlank") != null && options.useOnTargetBlank != newOptions.useOnTargetBlank)
+      settings.setSupportMultipleWindows(newOptions.useOnTargetBlank);
 
     if (newOptionsMap.get("useOnDownloadStart") != null && options.useOnDownloadStart != newOptions.useOnDownloadStart) {
       if (newOptions.useOnDownloadStart) {
@@ -1143,13 +1127,6 @@ final public class InAppWebView extends InputAwareWebView {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
     }
 
-    if (newOptionsMap.get("regexToCancelSubFramesLoading") != null && options.regexToCancelSubFramesLoading != newOptions.regexToCancelSubFramesLoading) {
-      if (newOptions.regexToCancelSubFramesLoading == null)
-        regexToCancelSubFramesLoadingCompiled = null;
-      else
-        regexToCancelSubFramesLoadingCompiled = Pattern.compile(options.regexToCancelSubFramesLoading);
-    }
-
     if (newOptions.contentBlockers != null) {
       contentBlockerHandler.getRuleList().clear();
       for (Map<String, Map<String, Object>> contentBlocker : newOptions.contentBlockers) {
@@ -1183,7 +1160,7 @@ final public class InAppWebView extends InputAwareWebView {
       scriptToInject = String.format(jsWrapper, jsonSourceString);
     }
     final String finalScriptToInject = scriptToInject;
-    post(new Runnable() {
+    ( (inAppBrowserActivity != null) ? inAppBrowserActivity : flutterWebView.activity ).runOnUiThread(new Runnable() {
       @Override
       public void run() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
@@ -1272,8 +1249,9 @@ final public class InAppWebView extends InputAwareWebView {
   }
 
   public void startSafeBrowsing(final MethodChannel.Result result) {
+    Activity activity = (inAppBrowserActivity != null) ? inAppBrowserActivity : registrar.activity();
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-      startSafeBrowsing(getContext(), new ValueCallback<Boolean>() {
+      startSafeBrowsing(activity.getApplicationContext(), new ValueCallback<Boolean>() {
         @Override
         public void onReceiveValue(Boolean value) {
           result.success(value);
@@ -1324,26 +1302,6 @@ final public class InAppWebView extends InputAwareWebView {
     webSettings.setLoadWithOverviewMode(enabled);
     webSettings.setSupportZoom(enabled);
     webSettings.setBuiltInZoomControls(enabled);
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public void printCurrentPage() {
-    // Get a PrintManager instance
-    PrintManager printManager = (PrintManager) Shared.activity.getApplicationContext()
-            .getSystemService(Context.PRINT_SERVICE);
-
-    String jobName = getTitle() + " Document";
-
-    // Get a printCurrentPage adapter instance
-    PrintDocumentAdapter printAdapter = createPrintDocumentAdapter(jobName);
-
-    // Create a printCurrentPage job with name and adapter instance
-    printManager.print(jobName, printAdapter,
-            new PrintAttributes.Builder().build());
-  }
-
-  public Float getUpdatedScale() {
-    return scale;
   }
 
   @Override
