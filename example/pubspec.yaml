@@ -11,7 +11,6 @@ version: 1.0.0+1
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
-  flutter: ">=1.10.0 <2.0.0"
 
 dependencies:
   flutter:
@@ -57,7 +56,7 @@ flutter:
     - test_assets/in_app_webview_javascript_handler_test.html
     - test_assets/in_app_webview_on_load_resource_custom_scheme_test.html
     - test_assets/in_app_webview_on_console_message_test.html
-    - test_assets/in_app_webview_on_create_window_test.html
+    - test_assets/in_app_webview_on_target_blank_test.html
     - test_assets/in_app_webview_on_js_dialog_test.html
     - test_assets/css/
     - test_assets/images/

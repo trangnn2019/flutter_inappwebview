@@ -6,8 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Picture;
 import android.graphics.drawable.ColorDrawable;
-
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -58,6 +56,7 @@ public class InAppBrowserActivity extends AppCompatActivity {
 
     webView = findViewById(R.id.webView);
     webView.inAppBrowserActivity = this;
+    webView.registrar = InAppWebViewFlutterPlugin.inAppBrowser.registrar;
 
     Bundle b = getIntent().getExtras();
     uuid = b.getString("uuid");
@@ -537,65 +536,5 @@ public class InAppBrowserActivity extends AppCompatActivity {
       });
       webView.loadUrl("about:blank");
     }
-  }
-
-  public void scrollTo(Integer x, Integer y) {
-    if (webView != null)
-      webView.scrollTo(x, y);
-  }
-
-  public void scrollBy(Integer x, Integer y) {
-    if (webView != null)
-      webView.scrollBy(x, y);
-  }
-
-  public void onPauseWebView() {
-    if (webView != null)
-      webView.onPause();
-  }
-
-  public void onResumeWebView() {
-    if (webView != null)
-      webView.onResume();
-  }
-
-  public void pauseTimers() {
-    if (webView != null)
-      webView.pauseTimers();
-  }
-
-  public void resumeTimers() {
-    if (webView != null)
-      webView.resumeTimers();
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public void printCurrentPage() {
-    if (webView != null)
-      webView.printCurrentPage();
-  }
-
-  public Integer getContentHeight() {
-    if (webView != null)
-      return webView.getContentHeight();
-    return null;
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public void zoomBy(Float zoomFactor) {
-    if (webView != null)
-      webView.zoomBy(zoomFactor);
-  }
-
-  public String getOriginalUrl() {
-    if (webView != null)
-      return webView.getOriginalUrl();
-    return null;
-  }
-
-  public Float getScale() {
-    if (webView != null)
-      return webView.getUpdatedScale();
-    return null;
   }
 }

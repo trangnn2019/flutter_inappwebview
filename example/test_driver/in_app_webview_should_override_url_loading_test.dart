@@ -29,7 +29,7 @@ class InAppWebViewShouldOverrideUrlLoadingTestState extends WidgetTestState {
                     initialFile: "test_assets/in_app_webview_initial_file_test.html",
                     initialHeaders: {},
                     initialOptions: InAppWebViewWidgetOptions(
-                        crossPlatform: InAppWebViewOptions(
+                        inAppWebViewOptions: InAppWebViewOptions(
                             clearCache: true,
                             debuggingEnabled: true,
                             useShouldOverrideUrlLoading: true
@@ -50,9 +50,8 @@ class InAppWebViewShouldOverrideUrlLoadingTestState extends WidgetTestState {
                         controller.evaluateJavascript(source: "document.querySelector('#link').click();");
                       }
                     },
-                    shouldOverrideUrlLoading: (InAppWebViewController controller, ShouldOverrideUrlLoadingRequest shouldOverrideUrlLoadingRequest) async {
+                    shouldOverrideUrlLoading: (InAppWebViewController controller, String url) {
                       controller.loadUrl(url: "https://flutter.dev/");
-                      return ShouldOverrideUrlLoadingAction.CANCEL;
                     },
                   ),
                 ),

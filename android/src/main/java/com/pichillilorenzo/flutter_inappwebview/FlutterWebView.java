@@ -5,7 +5,6 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -16,12 +15,10 @@ import com.pichillilorenzo.flutter_inappwebview.InAppWebView.InAppWebView;
 import com.pichillilorenzo.flutter_inappwebview.InAppWebView.InAppWebViewOptions;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
@@ -34,10 +31,15 @@ public class FlutterWebView implements PlatformView, MethodCallHandler  {
 
   static final String LOG_TAG = "FlutterWebView";
 
+  public final Activity activity;
   public InAppWebView webView;
   public final MethodChannel channel;
+  public final Registrar registrar;
 
-  public FlutterWebView(BinaryMessenger messenger, final Context context, int id, HashMap<String, Object> params, View containerView) {
+  public FlutterWebView(Registrar registrar, final Context context, int id, HashMap<String, Object> params, View containerView) {
+    this.registrar = registrar;
+    this.activity = registrar.activity();
+
     DisplayListenerProxy displayListenerProxy = new DisplayListenerProxy();
     DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     displayListenerProxy.onPreWebViewInitialization(displayManager);
@@ -51,31 +53,17 @@ public class FlutterWebView implements PlatformView, MethodCallHandler  {
     InAppWebViewOptions options = new InAppWebViewOptions();
     options.parse(initialOptions);
 
-    webView = new InAppWebView(Shared.activity, this, id, options, containerView);
+    webView = new InAppWebView(registrar, context, this, id, options, containerView);
     displayListenerProxy.onPostWebViewInitialization(displayManager);
-
-    // fix https://github.com/pichillilorenzo/flutter_inappwebview/issues/182
-    try {
-      Class superClass =  webView.getClass().getSuperclass();
-      while(!superClass.getName().equals("android.view.View")) {
-        superClass = superClass.getSuperclass();
-      }
-      Field mContext = superClass.getDeclaredField("mContext");
-      mContext.setAccessible(true);
-      mContext.set(webView, context);
-    } catch (Exception e) {
-      e.printStackTrace();
-      Log.e(LOG_TAG, "Cannot find mContext for this WebView");
-    }
 
     webView.prepare();
 
-    channel = new MethodChannel(messenger, "com.pichillilorenzo/flutter_inappwebview_" + id);
+    channel = new MethodChannel(registrar.messenger(), "com.pichillilorenzo/flutter_inappwebview_" + id);
     channel.setMethodCallHandler(this);
 
     if (initialFile != null) {
       try {
-        initialUrl = Util.getUrlAsset(initialFile);
+        initialUrl = Util.getUrlAsset(registrar, initialFile);
       } catch (IOException e) {
         e.printStackTrace();
         Log.e(LOG_TAG, initialFile + " asset file cannot be found!", e);
@@ -346,32 +334,6 @@ public class FlutterWebView implements PlatformView, MethodCallHandler  {
           result.success(false);
         }
         break;
-      case "printCurrentPage":
-        if (webView != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          webView.printCurrentPage();
-          result.success(true);
-        } else {
-          result.success(false);
-        }
-        break;
-      case "getContentHeight":
-        result.success((webView != null) ? webView.getContentHeight() : null);
-        break;
-      case "zoomBy":
-        if (webView != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          Float zoomFactor = (Float) call.argument("zoomFactor");
-          webView.zoomBy(zoomFactor);
-          result.success(true);
-        } else {
-          result.success(false);
-        }
-        break;
-      case "getOriginalUrl":
-        result.success((webView != null) ? webView.getOriginalUrl() : null);
-        break;
-      case "getScale":
-        result.success((webView != null) ? webView.getUpdatedScale() : null);
-        break;
       default:
         result.notImplemented();
     }
@@ -405,17 +367,12 @@ public class FlutterWebView implements PlatformView, MethodCallHandler  {
       webView.unlockInputConnection();
   }
 
-  @Override
   public void onFlutterViewAttached(View flutterView) {
-    if (webView != null) {
-      webView.setContainerView(flutterView);
-    }
+    webView.setContainerView(flutterView);
   }
 
-  @Override
   public void onFlutterViewDetached() {
-    if (webView != null) {
-      webView.setContainerView(null);
-    }
+    webView.setContainerView(null);
   }
+
 }

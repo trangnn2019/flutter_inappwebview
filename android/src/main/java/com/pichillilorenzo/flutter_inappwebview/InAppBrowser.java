@@ -22,12 +22,9 @@
 package com.pichillilorenzo.flutter_inappwebview;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Build;
 import android.os.Parcelable;
 import android.provider.Browser;
 import android.net.Uri;
@@ -36,8 +33,6 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
 
 import com.pichillilorenzo.flutter_inappwebview.ChromeCustomTabs.ChromeCustomTabsActivity;
 import com.pichillilorenzo.flutter_inappwebview.ChromeCustomTabs.CustomTabActivityHelper;
@@ -49,7 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.Result;
@@ -60,14 +54,16 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  */
 public class InAppBrowser implements MethodChannel.MethodCallHandler {
 
+  public Registrar registrar;
   public MethodChannel channel;
   public Map<String, InAppBrowserActivity> webViewActivities = new HashMap<>();
   public Map<String, ChromeCustomTabsActivity> chromeCustomTabsActivities = new HashMap<>();
 
   protected static final String LOG_TAG = "IABFlutterPlugin";
 
-  public InAppBrowser(BinaryMessenger messenger) {
-    channel = new MethodChannel(messenger, "com.pichillilorenzo/flutter_inappbrowser");
+  public InAppBrowser(Registrar r) {
+    registrar = r;
+    channel = new MethodChannel(registrar.messenger(), "com.pichillilorenzo/flutter_inappbrowser");
     channel.setMethodCallHandler(this);
   }
 
@@ -75,7 +71,7 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
   public void onMethodCall(final MethodCall call, final Result result) {
     String source;
     String urlFile;
-    final Activity activity = Shared.activity;
+    final Activity activity = registrar.activity();
     final String uuid = (String) call.argument("uuid");
 
     switch (call.method) {
@@ -115,7 +111,7 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
                 if (isLocalFile) {
                   // check if the asset file exists
                   try {
-                    url = Util.getUrlAsset(url);
+                    url = Util.getUrlAsset(registrar, url);
                   } catch (IOException e) {
                     e.printStackTrace();
                     result.error(LOG_TAG, url + " asset file cannot be found!", e);
@@ -134,7 +130,7 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
                       Intent intent = new Intent(Intent.ACTION_DIAL);
                       intent.setData(Uri.parse(url));
                       activity.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
+                    } catch (android.content.ActivityNotFoundException e) {
                       Log.e(LOG_TAG, "Error dialing " + url + ": " + e.toString());
                     }
                   }
@@ -311,67 +307,13 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
       case "clearMatches":
         clearMatches(uuid, result);
         break;
-      case "scrollTo":
-        {
-          Integer x = (Integer) call.argument("x");
-          Integer y = (Integer) call.argument("y");
-          scrollTo(uuid, x, y);
-        }
-        result.success(true);
-        break;
-      case "scrollBy":
-        {
-          Integer x = (Integer) call.argument("x");
-          Integer y = (Integer) call.argument("y");
-          scrollBy(uuid, x, y);
-        }
-        result.success(true);
-        break;
-      case "pause":
-         onPause(uuid);
-         result.success(true);
-        break;
-      case "resume":
-        onResume(uuid);
-        result.success(true);
-        break;
-      case "pauseTimers":
-        pauseTimers(uuid);
-        result.success(true);
-        break;
-      case "resumeTimers":
-        resumeTimers(uuid);
-        result.success(true);
-        break;
-      case "printCurrentPage":
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          printCurrentPage(uuid);
-        }
-        result.success(true);
-        break;
-      case "getContentHeight":
-        result.success(getContentHeight(uuid));
-        break;
-      case "zoomBy":
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          Float zoomFactor = (Float) call.argument("zoomFactor");
-          zoomBy(uuid, zoomFactor);
-        }
-        result.success(true);
-        break;
-      case "getOriginalUrl":
-        result.success(getOriginalUrl(uuid));
-        break;
-      case "getScale":
-        result.success(getScale(uuid));
-        break;
       default:
         result.notImplemented();
     }
 
   }
 
-  public void evaluateJavascript(String uuid, String source, final Result result) {
+  private void evaluateJavascript(String uuid, String source, final Result result) {
     final InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null) {
       inAppBrowserActivity.evaluateJavascript(source, result);
@@ -380,21 +322,21 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
     }
   }
 
-  public void injectJavascriptFileFromUrl(String uuid, String urlFile) {
+  private void injectJavascriptFileFromUrl(String uuid, String urlFile) {
     final InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null) {
       inAppBrowserActivity.injectJavascriptFileFromUrl(urlFile);
     }
   }
 
-  public void injectCSSCode(String uuid, String source) {
+  private void injectCSSCode(String uuid, String source) {
     final InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null) {
       inAppBrowserActivity.injectCSSCode(source);
     }
   }
 
-  public void injectCSSFileFromUrl(String uuid, String urlFile) {
+  private void injectCSSFileFromUrl(String uuid, String urlFile) {
     final InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null) {
       inAppBrowserActivity.injectCSSFileFromUrl(urlFile);
@@ -444,7 +386,7 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
    * Opens the intent, providing a chooser that excludes the current app to avoid
    * circular loops.
    */
-  public void openExternalExcludeCurrentApp(Activity activity, Intent intent) {
+  private void openExternalExcludeCurrentApp(Activity activity, Intent intent) {
     String currentPackage = activity.getPackageName();
     boolean hasCurrentPackage = false;
     PackageManager pm = activity.getPackageManager();
@@ -537,21 +479,21 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
     activity.startActivity(intent);
   }
 
-  public String getUrl(String uuid) {
+  private String getUrl(String uuid) {
     InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null)
       return inAppBrowserActivity.getUrl();
     return null;
   }
 
-  public String getTitle(String uuid) {
+  private String getTitle(String uuid) {
     InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null)
       return inAppBrowserActivity.getWebViewTitle();
     return null;
   }
 
-  public Integer getProgress(String uuid) {
+  private Integer getProgress(String uuid) {
     InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
     if (inAppBrowserActivity != null)
       return inAppBrowserActivity.getProgress();
@@ -786,77 +728,6 @@ public class InAppBrowser implements MethodChannel.MethodCallHandler {
     if (inAppBrowserActivity != null)
       inAppBrowserActivity.clearMatches(result);
     result.success(false);
-  }
-
-  public void scrollTo(String uuid, Integer x, Integer y) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.scrollTo(x, y);
-  }
-
-  public void scrollBy(String uuid, Integer x, Integer y) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.scrollBy(x, y);
-  }
-
-  public void onPause(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.onPauseWebView();
-  }
-
-  public void onResume(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.onResumeWebView();
-  }
-
-  public void pauseTimers(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.pauseTimers();
-  }
-
-  public void resumeTimers(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.resumeTimers();
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public void printCurrentPage(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.printCurrentPage();
-  }
-
-  public Integer getContentHeight(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      return inAppBrowserActivity.getContentHeight();
-    return null;
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-  public void zoomBy(String uuid, Float zoomFactor) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      inAppBrowserActivity.zoomBy(zoomFactor);
-  }
-
-  public String getOriginalUrl(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      return inAppBrowserActivity.getOriginalUrl();
-    return null;
-  }
-
-  public Float getScale(String uuid) {
-    InAppBrowserActivity inAppBrowserActivity = webViewActivities.get(uuid);
-    if (inAppBrowserActivity != null)
-      return inAppBrowserActivity.getScale();
-    return null;
   }
 
   public void dispose() {

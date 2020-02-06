@@ -5,15 +5,15 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'main_test.dart';
 import 'custom_widget_test.dart';
 
-class InAppWebViewOnCreateWindowTest extends WidgetTest {
-  final InAppWebViewOnCreateWindowTestState state = InAppWebViewOnCreateWindowTestState();
+class InAppWebViewOnTargetBlankTest extends WidgetTest {
+  final InAppWebViewOnTargetBlankTestState state = InAppWebViewOnTargetBlankTestState();
 
   @override
-  InAppWebViewOnCreateWindowTestState createState() => state;
+  InAppWebViewOnTargetBlankTestState createState() => state;
 }
 
-class InAppWebViewOnCreateWindowTestState extends WidgetTestState {
-  String appBarTitle = "InAppWebViewOnCreateWindowTest";
+class InAppWebViewOnTargetBlankTestState extends WidgetTestState {
+  String appBarTitle = "InAppWebViewOnTargetBlankTest";
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +26,13 @@ class InAppWebViewOnCreateWindowTestState extends WidgetTestState {
               Expanded(
                 child: Container(
                   child: InAppWebView(
-                    initialFile: "test_assets/in_app_webview_on_create_window_test.html",
+                    initialFile: "test_assets/in_app_webview_on_target_blank_test.html",
                     initialHeaders: {},
                     initialOptions: InAppWebViewWidgetOptions(
-                        crossPlatform: InAppWebViewOptions(
+                        inAppWebViewOptions: InAppWebViewOptions(
                             clearCache: true,
                             debuggingEnabled: true,
+                            useOnTargetBlank: true,
                             javaScriptCanOpenWindowsAutomatically: true,
                         )
                     ),
@@ -48,8 +49,8 @@ class InAppWebViewOnCreateWindowTestState extends WidgetTestState {
                         });
                       }
                     },
-                    onCreateWindow: (InAppWebViewController controller, OnCreateWindowRequest onCreateWindowRequest) {
-                      controller.loadUrl(url: onCreateWindowRequest.url);
+                    onTargetBlank: (InAppWebViewController controller, String url) {
+                      controller.loadUrl(url: url);
                     },
                   ),
                 ),

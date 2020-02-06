@@ -92,9 +92,12 @@ appAuthBasic.use((req, res, next) => {
   } else {
     next()
   }
-});
+})
 
 appAuthBasic.use(express.static(__dirname + '/public'));
+appAuthBasic.get('/test-index', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
 
 appAuthBasic.get("/", (req, res) => {
   console.log(JSON.stringify(req.headers))
@@ -108,13 +111,9 @@ appAuthBasic.get("/", (req, res) => {
     </html>
   `);
   res.end()
-});
+})
 
-appAuthBasic.get('/test-index', (req, res) => {
-    res.sendFile(__dirname + '/public/test-index.html');
-});
-
-appAuthBasic.listen(8081);
+appAuthBasic.listen(8081)
 
 
 
@@ -127,6 +126,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use(express.static(__dirname + '/public'));
+app.get('/test-index', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
 
 app.get("/", (req, res) => {
   console.log(JSON.stringify(req.headers))
@@ -140,10 +142,6 @@ app.get("/", (req, res) => {
     </html>
   `);
   res.end()
-})
-
-app.get('/test-index', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
 })
 
 app.post("/test-post", (req, res) => {

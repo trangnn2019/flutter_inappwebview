@@ -223,7 +223,7 @@ class WebHistoryItem {
 
 ///GeolocationPermissionPromptResponse class.
 ///
-///Class used by the host application to set the Geolocation permission state for an origin during the [androidOnGeolocationPermissionsShowPrompt] event.
+///Class used by the host application to set the Geolocation permission state for an origin during the [onGeolocationPermissionsShowPrompt] event.
 class GeolocationPermissionShowPromptResponse {
   ///The origin for which permissions are set.
   String origin;
@@ -462,10 +462,10 @@ class SafeBrowsingResponseAction {
   int get hashCode => _value.hashCode;
 }
 
-///SafeBrowsingResponse class represents the response used by the [androidOnSafeBrowsingHit] event.
+///SafeBrowsingResponse class represents the response used by the [onSafeBrowsingHit] event.
 ///It is used to indicate an action to take when hitting a malicious URL.
 class SafeBrowsingResponse {
-  ///If reporting is enabled, all reports will be sent according to the privacy policy referenced by [InAppWebViewController.androidGetSafeBrowsingPrivacyPolicyUrl].
+  ///If reporting is enabled, all reports will be sent according to the privacy policy referenced by [InAppWebViewController.getSafeBrowsingPrivacyPolicyUrl].
   bool report;
 
   ///Indicate the [SafeBrowsingResponseAction] to take when hitting a malicious URL.
@@ -944,13 +944,13 @@ class AndroidInAppWebViewMixedContentMode {
   int get hashCode => _value.hashCode;
 }
 
-///IOSInAppWebViewSelectionGranularity class represents an iOS-specific class used to set the level of granularity with which the user can interactively select content in the web view.
-class IOSInAppWebViewSelectionGranularity {
+///IosInAppWebViewSelectionGranularity class represents an iOS-specific class used to set the level of granularity with which the user can interactively select content in the web view.
+class IosInAppWebViewSelectionGranularity {
   final int _value;
-  const IOSInAppWebViewSelectionGranularity._internal(this._value);
-  static IOSInAppWebViewSelectionGranularity fromValue(int value) {
+  const IosInAppWebViewSelectionGranularity._internal(this._value);
+  static IosInAppWebViewSelectionGranularity fromValue(int value) {
     if (value != null && value >= 0 && value <= 1)
-      return IOSInAppWebViewSelectionGranularity._internal(value);
+      return IosInAppWebViewSelectionGranularity._internal(value);
     return null;
   }
 
@@ -967,11 +967,11 @@ class IOSInAppWebViewSelectionGranularity {
   }
 
   ///Selection granularity varies automatically based on the selection.
-  static const DYNAMIC = const IOSInAppWebViewSelectionGranularity._internal(0);
+  static const DYNAMIC = const IosInAppWebViewSelectionGranularity._internal(0);
 
   ///Selection endpoints can be placed at any character boundary.
   static const CHARACTER =
-      const IOSInAppWebViewSelectionGranularity._internal(1);
+      const IosInAppWebViewSelectionGranularity._internal(1);
 
   bool operator ==(value) => value == _value;
 
@@ -979,13 +979,13 @@ class IOSInAppWebViewSelectionGranularity {
   int get hashCode => _value.hashCode;
 }
 
-///IOSInAppWebViewDataDetectorTypes class represents an iOS-specific class used to specify a dataDetectoryTypes value that adds interactivity to web content that matches the value.
+///IosInAppWebViewDataDetectorTypes class represents an iOS-specific class used to specify a dataDetectoryTypes value that adds interactivity to web content that matches the value.
 ///
 ///**NOTE**: available on iOS 10.0+.
-class IOSInAppWebViewDataDetectorTypes {
+class IosInAppWebViewDataDetectorTypes {
   final String _value;
-  const IOSInAppWebViewDataDetectorTypes._internal(this._value);
-  static IOSInAppWebViewDataDetectorTypes fromValue(String value) {
+  const IosInAppWebViewDataDetectorTypes._internal(this._value);
+  static IosInAppWebViewDataDetectorTypes fromValue(String value) {
     return ([
       "NONE",
       "PHONE_NUMBER",
@@ -999,7 +999,7 @@ class IOSInAppWebViewDataDetectorTypes {
       "SPOTLIGHT_SUGGESTION",
       "ALL"
     ].contains(value))
-        ? IOSInAppWebViewDataDetectorTypes._internal(value)
+        ? IosInAppWebViewDataDetectorTypes._internal(value)
         : null;
   }
 
@@ -1008,41 +1008,41 @@ class IOSInAppWebViewDataDetectorTypes {
   String toString() => _value;
 
   ///No detection is performed.
-  static const NONE = const IOSInAppWebViewDataDetectorTypes._internal("NONE");
+  static const NONE = const IosInAppWebViewDataDetectorTypes._internal("NONE");
 
   ///Phone numbers are detected and turned into links.
   static const PHONE_NUMBER =
-      const IOSInAppWebViewDataDetectorTypes._internal("PHONE_NUMBER");
+      const IosInAppWebViewDataDetectorTypes._internal("PHONE_NUMBER");
 
   ///URLs in text are detected and turned into links.
-  static const LINK = const IOSInAppWebViewDataDetectorTypes._internal("LINK");
+  static const LINK = const IosInAppWebViewDataDetectorTypes._internal("LINK");
 
   ///Addresses are detected and turned into links.
   static const ADDRESS =
-      const IOSInAppWebViewDataDetectorTypes._internal("ADDRESS");
+      const IosInAppWebViewDataDetectorTypes._internal("ADDRESS");
 
   ///Dates and times that are in the future are detected and turned into links.
   static const CALENDAR_EVENT =
-      const IOSInAppWebViewDataDetectorTypes._internal("CALENDAR_EVENT");
+      const IosInAppWebViewDataDetectorTypes._internal("CALENDAR_EVENT");
 
   ///Tracking numbers are detected and turned into links.
   static const TRACKING_NUMBER =
-      const IOSInAppWebViewDataDetectorTypes._internal("TRACKING_NUMBER");
+      const IosInAppWebViewDataDetectorTypes._internal("TRACKING_NUMBER");
 
   ///Flight numbers are detected and turned into links.
   static const FLIGHT_NUMBER =
-      const IOSInAppWebViewDataDetectorTypes._internal("FLIGHT_NUMBER");
+      const IosInAppWebViewDataDetectorTypes._internal("FLIGHT_NUMBER");
 
   ///Lookup suggestions are detected and turned into links.
   static const LOOKUP_SUGGESTION =
-      const IOSInAppWebViewDataDetectorTypes._internal("LOOKUP_SUGGESTION");
+      const IosInAppWebViewDataDetectorTypes._internal("LOOKUP_SUGGESTION");
 
   ///Spotlight suggestions are detected and turned into links.
   static const SPOTLIGHT_SUGGESTION =
-      const IOSInAppWebViewDataDetectorTypes._internal("SPOTLIGHT_SUGGESTION");
+      const IosInAppWebViewDataDetectorTypes._internal("SPOTLIGHT_SUGGESTION");
 
   ///All of the above data types are turned into links when detected. Choosing this value will automatically include any new detection type that is added.
-  static const ALL = const IOSInAppWebViewDataDetectorTypes._internal("ALL");
+  static const ALL = const IosInAppWebViewDataDetectorTypes._internal("ALL");
 
   bool operator ==(value) => value == _value;
 
@@ -1091,13 +1091,13 @@ class InAppWebViewUserPreferredContentMode {
   int get hashCode => _value.hashCode;
 }
 
-///IOSWebViewOptionsPresentationStyle class represents an iOS-specific class used to specify the modal presentation style when presenting a view controller.
-class IOSWebViewOptionsPresentationStyle {
+///IosWebViewOptionsPresentationStyle class represents an iOS-specific class used to specify the modal presentation style when presenting a view controller.
+class IosWebViewOptionsPresentationStyle {
   final int _value;
-  const IOSWebViewOptionsPresentationStyle._internal(this._value);
-  static IOSWebViewOptionsPresentationStyle fromValue(int value) {
+  const IosWebViewOptionsPresentationStyle._internal(this._value);
+  static IosWebViewOptionsPresentationStyle fromValue(int value) {
     if (value != null && value >= 0 && value <= 9)
-      return IOSWebViewOptionsPresentationStyle._internal(value);
+      return IosWebViewOptionsPresentationStyle._internal(value);
     return null;
   }
 
@@ -1131,42 +1131,42 @@ class IOSWebViewOptionsPresentationStyle {
 
   ///A presentation style in which the presented view covers the screen.
   static const FULL_SCREEN =
-      const IOSWebViewOptionsPresentationStyle._internal(0);
+      const IosWebViewOptionsPresentationStyle._internal(0);
 
   ///A presentation style that partially covers the underlying content.
   static const PAGE_SHEET =
-      const IOSWebViewOptionsPresentationStyle._internal(1);
+      const IosWebViewOptionsPresentationStyle._internal(1);
 
   ///A presentation style that displays the content centered in the screen.
   static const FORM_SHEET =
-      const IOSWebViewOptionsPresentationStyle._internal(2);
+      const IosWebViewOptionsPresentationStyle._internal(2);
 
   ///A presentation style where the content is displayed over another view controller’s content.
   static const CURRENT_CONTEXT =
-      const IOSWebViewOptionsPresentationStyle._internal(3);
+      const IosWebViewOptionsPresentationStyle._internal(3);
 
   ///A custom view presentation style that is managed by a custom presentation controller and one or more custom animator objects.
-  static const CUSTOM = const IOSWebViewOptionsPresentationStyle._internal(4);
+  static const CUSTOM = const IosWebViewOptionsPresentationStyle._internal(4);
 
   ///A view presentation style in which the presented view covers the screen.
   static const OVER_FULL_SCREEN =
-      const IOSWebViewOptionsPresentationStyle._internal(5);
+      const IosWebViewOptionsPresentationStyle._internal(5);
 
   ///A presentation style where the content is displayed over another view controller’s content.
   static const OVER_CURRENT_CONTEXT =
-      const IOSWebViewOptionsPresentationStyle._internal(6);
+      const IosWebViewOptionsPresentationStyle._internal(6);
 
   ///A presentation style where the content is displayed in a popover view.
-  static const POPOVER = const IOSWebViewOptionsPresentationStyle._internal(7);
+  static const POPOVER = const IosWebViewOptionsPresentationStyle._internal(7);
 
   ///A presentation style that indicates no adaptations should be made.
-  static const NONE = const IOSWebViewOptionsPresentationStyle._internal(8);
+  static const NONE = const IosWebViewOptionsPresentationStyle._internal(8);
 
   ///The default presentation style chosen by the system.
   ///
   ///**NOTE**: available on iOS 13.0+.
   static const AUTOMATIC =
-      const IOSWebViewOptionsPresentationStyle._internal(9);
+      const IosWebViewOptionsPresentationStyle._internal(9);
 
   bool operator ==(value) => value == _value;
 
@@ -1174,13 +1174,13 @@ class IOSWebViewOptionsPresentationStyle {
   int get hashCode => _value.hashCode;
 }
 
-///IOSWebViewOptionsTransitionStyle class represents an iOS-specific class used to specify the transition style when presenting a view controller.
-class IOSWebViewOptionsTransitionStyle {
+///IosWebViewOptionsTransitionStyle class represents an iOS-specific class used to specify the transition style when presenting a view controller.
+class IosWebViewOptionsTransitionStyle {
   final int _value;
-  const IOSWebViewOptionsTransitionStyle._internal(this._value);
-  static IOSWebViewOptionsTransitionStyle fromValue(int value) {
+  const IosWebViewOptionsTransitionStyle._internal(this._value);
+  static IosWebViewOptionsTransitionStyle fromValue(int value) {
     if (value != null && value >= 0 && value <= 3)
-      return IOSWebViewOptionsTransitionStyle._internal(value);
+      return IosWebViewOptionsTransitionStyle._internal(value);
     return null;
   }
 
@@ -1203,24 +1203,24 @@ class IOSWebViewOptionsTransitionStyle {
   ///When the view controller is presented, its view slides up from the bottom of the screen.
   ///On dismissal, the view slides back down. This is the default transition style.
   static const COVER_VERTICAL =
-      const IOSWebViewOptionsTransitionStyle._internal(0);
+      const IosWebViewOptionsTransitionStyle._internal(0);
 
   ///When the view controller is presented, the current view initiates a horizontal 3D flip from right-to-left,
   ///resulting in the revealing of the new view as if it were on the back of the previous view.
   ///On dismissal, the flip occurs from left-to-right, returning to the original view.
   static const FLIP_HORIZONTAL =
-      const IOSWebViewOptionsTransitionStyle._internal(1);
+      const IosWebViewOptionsTransitionStyle._internal(1);
 
   ///When the view controller is presented, the current view fades out while the new view fades in at the same time.
   ///On dismissal, a similar type of cross-fade is used to return to the original view.
   static const CROSS_DISSOLVE =
-      const IOSWebViewOptionsTransitionStyle._internal(2);
+      const IosWebViewOptionsTransitionStyle._internal(2);
 
   ///When the view controller is presented, one corner of the current view curls up to reveal the presented view underneath.
   ///On dismissal, the curled up page unfurls itself back on top of the presented view.
   ///A view controller presented using this transition is itself prevented from presenting any additional view controllers.
   static const PARTIAL_CURL =
-      const IOSWebViewOptionsTransitionStyle._internal(3);
+      const IosWebViewOptionsTransitionStyle._internal(3);
 
   bool operator ==(value) => value == _value;
 
@@ -1228,15 +1228,15 @@ class IOSWebViewOptionsTransitionStyle {
   int get hashCode => _value.hashCode;
 }
 
-///IOSSafariOptionsDismissButtonStyle class represents an iOS-specific class used to set the custom style for the dismiss button.
+///IosWebViewOptionsTransitionStyle class represents an iOS-specific class used to set the custom style for the dismiss button.
 ///
 ///**NOTE**: available on iOS 11.0+.
-class IOSSafariOptionsDismissButtonStyle {
+class IosSafariOptionsDismissButtonStyle {
   final int _value;
-  const IOSSafariOptionsDismissButtonStyle._internal(this._value);
-  static IOSSafariOptionsDismissButtonStyle fromValue(int value) {
+  const IosSafariOptionsDismissButtonStyle._internal(this._value);
+  static IosSafariOptionsDismissButtonStyle fromValue(int value) {
     if (value != null && value >= 0 && value <= 2)
-      return IOSSafariOptionsDismissButtonStyle._internal(value);
+      return IosSafariOptionsDismissButtonStyle._internal(value);
     return null;
   }
 
@@ -1255,13 +1255,13 @@ class IOSSafariOptionsDismissButtonStyle {
   }
 
   ///Makes the button title the localized string "Done".
-  static const DONE = const IOSSafariOptionsDismissButtonStyle._internal(0);
+  static const DONE = const IosSafariOptionsDismissButtonStyle._internal(0);
 
   ///Makes the button title the localized string "Close".
-  static const CLOSE = const IOSSafariOptionsDismissButtonStyle._internal(1);
+  static const CLOSE = const IosSafariOptionsDismissButtonStyle._internal(1);
 
   ///Makes the button title the localized string "Cancel".
-  static const CANCEL = const IOSSafariOptionsDismissButtonStyle._internal(2);
+  static const CANCEL = const IosSafariOptionsDismissButtonStyle._internal(2);
 
   bool operator ==(value) => value == _value;
 
@@ -1272,51 +1272,51 @@ class IOSSafariOptionsDismissButtonStyle {
 ///InAppWebViewWidgetOptions class represents the options that can be used for an [InAppWebView].
 class InAppWebViewWidgetOptions {
   ///Cross-platform options.
-  InAppWebViewOptions crossPlatform;
+  InAppWebViewOptions inAppWebViewOptions;
 
   ///Android-specific options.
-  AndroidInAppWebViewOptions android;
+  AndroidInAppWebViewOptions androidInAppWebViewOptions;
 
   ///iOS-specific options.
-  IOSInAppWebViewOptions ios;
+  IosInAppWebViewOptions iosInAppWebViewOptions;
 
   InAppWebViewWidgetOptions(
-      {this.crossPlatform,
-      this.android,
-      this.ios});
+      {this.inAppWebViewOptions,
+      this.androidInAppWebViewOptions,
+      this.iosInAppWebViewOptions});
 }
 
 ///InAppBrowserClassOptions class represents the options that can be used for an [InAppBrowser] WebView.
 class InAppBrowserClassOptions {
   ///Cross-platform options.
-  InAppBrowserOptions crossPlatform;
+  InAppBrowserOptions inAppBrowserOptions;
 
   ///Android-specific options.
-  AndroidInAppBrowserOptions android;
+  AndroidInAppBrowserOptions androidInAppBrowserOptions;
 
   ///iOS-specific options.
-  IOSInAppBrowserOptions ios;
+  IosInAppBrowserOptions iosInAppBrowserOptions;
 
   ///WebView options.
   InAppWebViewWidgetOptions inAppWebViewWidgetOptions;
 
   InAppBrowserClassOptions(
-      {this.crossPlatform,
-      this.android,
-      this.ios,
+      {this.inAppBrowserOptions,
+      this.androidInAppBrowserOptions,
+      this.iosInAppBrowserOptions,
       this.inAppWebViewWidgetOptions});
 }
 
 ///ChromeSafariBrowserClassOptions class represents the options that can be used for an [ChromeSafariBrowser] window.
 class ChromeSafariBrowserClassOptions {
   ///Android-specific options.
-  AndroidChromeCustomTabsOptions android;
+  AndroidChromeCustomTabsOptions androidChromeCustomTabsOptions;
 
   ///iOS-specific options.
-  IOSSafariOptions ios;
+  IosSafariOptions iosSafariOptions;
 
   ChromeSafariBrowserClassOptions(
-      {this.android, this.ios});
+      {this.androidChromeCustomTabsOptions, this.iosSafariOptions});
 }
 
 ///AjaxRequestAction class used by [AjaxRequest] class.
@@ -1950,7 +1950,7 @@ class PermissionRequestResponseAction {
   int get hashCode => _value.hashCode;
 }
 
-///PermissionRequestResponse class represents the response used by the [androidOnPermissionRequest] event.
+///PermissionRequestResponse class represents the response used by the [onPermissionRequest] event.
 class PermissionRequestResponse {
   ///Resources granted to be accessed by origin.
   List<String> resources;
@@ -1964,260 +1964,5 @@ class PermissionRequestResponse {
 
   Map<String, dynamic> toMap() {
     return {"resources": resources, "action": action?.toValue()};
-  }
-}
-
-///ShouldOverrideUrlLoadingAction class is used by [shouldOverrideUrlLoading] event.
-///It represents the policy to pass back to the decision handler.
-class ShouldOverrideUrlLoadingAction {
-  final int _value;
-  const ShouldOverrideUrlLoadingAction._internal(this._value);
-  int toValue() => _value;
-
-  ///Cancel the navigation.
-  static const CANCEL = const ShouldOverrideUrlLoadingAction._internal(0);
-
-  ///Allow the navigation to continue.
-  static const ALLOW = const ShouldOverrideUrlLoadingAction._internal(1);
-
-  bool operator ==(value) => value == _value;
-
-  @override
-  int get hashCode => _value.hashCode;
-
-  Map<String, dynamic> toMap() {
-    return {
-      "action": _value,
-    };
-  }
-}
-
-///IOSWKNavigationType class represents the type of action triggering a navigation on iOS for the [shouldOverrideUrlLoading] event.
-class IOSWKNavigationType {
-  final int _value;
-  const IOSWKNavigationType._internal(this._value);
-  int toValue() => _value;
-  static IOSWKNavigationType fromValue(int value) {
-    if (value != null && ((value >= 0 && value <= 4) || value == -1))
-      return IOSWKNavigationType._internal(value);
-    return null;
-  }
-
-  ///A link with an href attribute was activated by the user.
-  static const LINK_ACTIVATED = const IOSWKNavigationType._internal(0);
-
-  ///A form was submitted.
-  static const FORM_SUBMITTED = const IOSWKNavigationType._internal(1);
-
-  ///An item from the back-forward list was requested.
-  static const BACK_FORWARD = const IOSWKNavigationType._internal(2);
-
-  ///The webpage was reloaded.
-  static const RELOAD = const IOSWKNavigationType._internal(3);
-
-  ///A form was resubmitted (for example by going back, going forward, or reloading).
-  static const FORM_RESUBMITTED = const IOSWKNavigationType._internal(4);
-
-  ///Navigation is taking place for some other reason.
-  static const OTHER = const IOSWKNavigationType._internal(-1);
-
-  bool operator ==(value) => value == _value;
-
-  @override
-  int get hashCode => _value.hashCode;
-}
-
-///ShouldOverrideUrlLoadingAction class represents the navigation request used by the [shouldOverrideUrlLoading] event.
-class ShouldOverrideUrlLoadingRequest {
-  ///Represents the url of the navigation request.
-  String url;
-
-  ///Represents the method of the navigation request. On Android < 21, this value is always `GET`.
-  String method;
-
-  ///Represents the headers of the navigation request. On Android < 21, this is always `null`.
-  Map<String, String> headers;
-
-  ///Indicates whether the request was made for the main frame. On Android < 21, this is always `true`.
-  bool isForMainFrame;
-
-  ///Gets whether the request was a result of a server-side redirect. Available only on Android. On Android < 21, this is always `false`.
-  bool androidHasGesture;
-
-  ///Gets whether a gesture (such as a click) was associated with the request.
-  ///For security reasons in certain situations this method may return `false` even though
-  ///the sequence of events which caused the request to be created was initiated by a user
-  ///gesture.
-  ///
-  ///Available only on Android. On Android < 24, this is always `false`.
-  bool androidIsRedirect;
-
-  ///The type of action triggering the navigation. Available only on iOS.
-  IOSWKNavigationType iosWKNavigationType;
-
-  ShouldOverrideUrlLoadingRequest({this.url, this.method, this.headers, this.isForMainFrame, this.androidHasGesture, this.androidIsRedirect, this.iosWKNavigationType});
-}
-
-///OnCreateWindowRequest class represents the navigation request used by the [shouldOverrideUrlLoading] event.
-class OnCreateWindowRequest {
-  ///Represents the url of the navigation request.
-  String url;
-
-  ///Indicates if the new window should be a dialog, rather than a full-size window. Available only on Android.
-  bool androidIsDialog;
-
-  ///Indicates if the request was initiated by a user gesture, such as the user clicking a link. Available only on Android.
-  bool androidIsUserGesture;
-
-  ///The type of action triggering the navigation. Available only on iOS.
-  IOSWKNavigationType iosWKNavigationType;
-
-  OnCreateWindowRequest({this.url, this.androidIsDialog, this.androidIsUserGesture, this.iosWKNavigationType});
-}
-
-///AndroidWebStorage class encapsulates information about the amount of storage currently used by an origin for the JavaScript storage APIs.
-///An origin comprises the host, scheme and port of a URI. See [AndroidWebStorageManager] for details.
-class AndroidWebStorageOrigin {
-  ///The string representation of this origin.
-  String origin;
-
-  ///The quota for this origin, for the Web SQL Database API, in bytes.
-  int quota;
-
-  ///The total amount of storage currently being used by this origin, for all JavaScript storage APIs, in bytes.
-  int usage;
-
-  AndroidWebStorageOrigin({this.origin, this.quota, this.usage});
-
-  Map<String, dynamic> toMap() {
-    return {
-      "origin": origin,
-      "quota": quota,
-      "usage": usage
-    };
-  }
-
-  String toString() {
-    return toMap().toString();
-  }
-}
-
-///IOSWKWebsiteDataType class represents a website data type.
-///
-///**NOTE**: available on iOS 9.0+.
-class IOSWKWebsiteDataType {
-  final String _value;
-  const IOSWKWebsiteDataType._internal(this._value);
-  static IOSWKWebsiteDataType fromValue(String value) {
-    return ([
-      "WKWebsiteDataTypeFetchCache",
-      "WKWebsiteDataTypeDiskCache",
-      "WKWebsiteDataTypeMemoryCache",
-      "WKWebsiteDataTypeOfflineWebApplicationCache",
-      "WKWebsiteDataTypeCookies",
-      "WKWebsiteDataTypeSessionStorage",
-      "WKWebsiteDataTypeLocalStorage",
-      "WKWebsiteDataTypeWebSQLDatabases",
-      "WKWebsiteDataTypeIndexedDBDatabases",
-      "WKWebsiteDataTypeServiceWorkerRegistrations"
-      ].contains(value))
-        ? IOSWKWebsiteDataType._internal(value)
-        : null;
-  }
-
-  String toValue() => _value;
-  @override
-  String toString() => _value;
-
-  ///On-disk Fetch caches.
-  ///
-  ///**NOTE**: available on iOS 11.3+.
-  static const WKWebsiteDataTypeFetchCache =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeFetchCache");
-
-  ///On-disk caches.
-  static const WKWebsiteDataTypeDiskCache =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeDiskCache");
-
-  ///In-memory caches.
-  static const WKWebsiteDataTypeMemoryCache =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeMemoryCache");
-
-  ///HTML offline web application caches.
-  static const WKWebsiteDataTypeOfflineWebApplicationCache =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeOfflineWebApplicationCache");
-
-  ///Cookies.
-  static const WKWebsiteDataTypeCookies =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeCookies");
-
-  ///HTML session storage.
-  static const WKWebsiteDataTypeSessionStorage =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeSessionStorage");
-
-  ///HTML local storage.
-  static const WKWebsiteDataTypeLocalStorage =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeLocalStorage");
-
-  ///WebSQL databases.
-  static const WKWebsiteDataTypeWebSQLDatabases =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeWebSQLDatabases");
-
-  ///IndexedDB databases.
-  static const WKWebsiteDataTypeIndexedDBDatabases =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeIndexedDBDatabases");
-
-  ///Service worker registrations.
-  ///
-  ///**NOTE**: available on iOS 11.3+.
-  static const WKWebsiteDataTypeServiceWorkerRegistrations =
-  const IOSWKWebsiteDataType._internal("WKWebsiteDataTypeServiceWorkerRegistrations");
-
-  ///Returns a set of all available website data types.
-  static final Set<IOSWKWebsiteDataType> ALL = [
-    IOSWKWebsiteDataType.WKWebsiteDataTypeFetchCache,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeDiskCache,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeMemoryCache,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeOfflineWebApplicationCache,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeCookies,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeSessionStorage,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeLocalStorage,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeWebSQLDatabases,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeIndexedDBDatabases,
-    IOSWKWebsiteDataType.WKWebsiteDataTypeServiceWorkerRegistrations
-  ].toSet();
-
-  bool operator ==(value) => value == _value;
-
-  @override
-  int get hashCode => _value.hashCode;
-}
-
-///WKWebsiteDataRecord class represents website data, grouped by domain name using the public suffix list.
-///
-///**NOTE**: available on iOS 9.0+.
-class IOSWKWebsiteDataRecord {
-  ///The display name for the data record. This is usually the domain name.
-  String displayName;
-
-  ///The various types of website data that exist for this data record.
-  Set<IOSWKWebsiteDataType> dataTypes;
-
-  IOSWKWebsiteDataRecord({this.displayName, this.dataTypes});
-
-  Map<String, dynamic> toMap() {
-    List<String> dataTypesString = [];
-    for (var dataType in dataTypes) {
-      dataTypesString.add(dataType.toValue());
-    }
-
-    return {
-      "displayName": displayName,
-      "dataTypes": dataTypesString
-    };
-  }
-
-  String toString() {
-    return toMap().toString();
   }
 }

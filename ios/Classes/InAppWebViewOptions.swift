@@ -14,6 +14,7 @@ public class InAppWebViewOptions: Options {
     var useShouldOverrideUrlLoading = false
     var useOnLoadResource = false
     var useOnDownloadStart = false
+    var useOnTargetBlank = false
     var clearCache = false
     var userAgent = ""
     var applicationNameForUserAgent = ""
@@ -48,7 +49,6 @@ public class InAppWebViewOptions: Options {
     var dataDetectorTypes: [String] = ["NONE"] // WKDataDetectorTypeNone
     var preferredContentMode = 0
     var sharedCookiesEnabled = false
-    var automaticallyAdjustsScrollIndicatorInsets = false
     
     override init(){
         super.init()

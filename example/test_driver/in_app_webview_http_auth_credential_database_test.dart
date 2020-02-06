@@ -38,7 +38,7 @@ class InAppWebViewHttpAuthCredentialDatabaseTestState extends WidgetTestState {
                     initialUrl: "http://${environment["NODE_SERVER_IP"]}:8081/",
                     initialHeaders: {},
                     initialOptions: InAppWebViewWidgetOptions(
-                        crossPlatform: InAppWebViewOptions(
+                        inAppWebViewOptions: InAppWebViewOptions(
                             clearCache: true,
                             debuggingEnabled: true
                         )

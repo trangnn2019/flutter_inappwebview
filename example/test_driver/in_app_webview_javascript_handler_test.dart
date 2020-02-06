@@ -44,7 +44,7 @@ class InAppWebViewJavaScriptHandlerTestState extends WidgetTestState {
                     initialFile: "test_assets/in_app_webview_javascript_handler_test.html",
                     initialHeaders: {},
                     initialOptions: InAppWebViewWidgetOptions(
-                        crossPlatform: InAppWebViewOptions(
+                        inAppWebViewOptions: InAppWebViewOptions(
                             clearCache: true,
                             debuggingEnabled: true
                         )

@@ -57,7 +57,7 @@ class InAppWebViewAjaxTestState extends WidgetTestState {
                     """),
                     initialHeaders: {},
                     initialOptions: InAppWebViewWidgetOptions(
-                        crossPlatform: InAppWebViewOptions(
+                        inAppWebViewOptions: InAppWebViewOptions(
                             clearCache: true,
                             debuggingEnabled: true,
                             useShouldInterceptAjaxRequest: true,

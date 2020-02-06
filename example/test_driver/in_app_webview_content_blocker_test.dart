@@ -30,7 +30,7 @@ class InAppWebViewContentBlockerTestState extends WidgetTestState {
                     initialUrl: "https://flutter.dev/",
                     initialHeaders: {},
                     initialOptions: InAppWebViewWidgetOptions(
-                        crossPlatform: InAppWebViewOptions(
+                        inAppWebViewOptions: InAppWebViewOptions(
                             clearCache: true,
                             debuggingEnabled: true,
                             contentBlockers: [

@@ -8,13 +8,12 @@
 import Foundation
 import WebKit
 
-public class FlutterWebViewController: FlutterMethodCallDelegate, FlutterPlatformView {
+public class FlutterWebViewController: NSObject, FlutterPlatformView {
     
     private weak var registrar: FlutterPluginRegistrar?
     var webView: InAppWebView?
     var viewId: Int64 = 0
     var channel: FlutterMethodChannel?
-    var myView: UIView?
 
     init(registrar: FlutterPluginRegistrar, withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: NSDictionary) {
         super.init()
@@ -22,29 +21,24 @@ public class FlutterWebViewController: FlutterMethodCallDelegate, FlutterPlatfor
         self.registrar = registrar
         self.viewId = viewId
         
-        myView = UIView(frame: frame)
-        
-        let channelName = "com.pichillilorenzo/flutter_inappwebview_" + String(viewId)
-        self.channel = FlutterMethodChannel(name: channelName, binaryMessenger: registrar.messenger())
-        self.channel?.setMethodCallHandler(LeakAvoider(delegate: self).handle)
-        
         let initialUrl = (args["initialUrl"] as? String)!
         let initialFile = args["initialFile"] as? String
         let initialData = args["initialData"] as? [String: String]
         let initialHeaders = (args["initialHeaders"] as? [String: String])!
         let initialOptions = (args["initialOptions"] as? [String: Any])!
-
+        
         let options = InAppWebViewOptions()
         options.parse(options: initialOptions)
         let preWebviewConfiguration = InAppWebView.preWKWebViewConfiguration(options: options)
-
-        webView = InAppWebView(frame: myView!.bounds, configuration: preWebviewConfiguration, IABController: nil, channel: self.channel)
-        webView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        myView!.addSubview(webView!)
+        
+        webView = InAppWebView(frame: frame, configuration: preWebviewConfiguration, IABController: nil, IAWController: self)
+        let channelName = "com.pichillilorenzo/flutter_inappwebview_" + String(viewId)
+        self.channel = FlutterMethodChannel(name: channelName, binaryMessenger: registrar.messenger())
+        self.channel?.setMethodCallHandler(self.handle)
         
         webView!.options = options
         webView!.prepare()
-
+        
         if #available(iOS 11.0, *) {
             self.webView!.configuration.userContentController.removeAllContentRuleLists()
             if let contentBlockers = webView!.options?.contentBlockers, contentBlockers.count > 0 {
@@ -54,15 +48,15 @@ public class FlutterWebViewController: FlutterMethodCallDelegate, FlutterPlatfor
                     WKContentRuleListStore.default().compileContentRuleList(
                         forIdentifier: "ContentBlockingRules",
                         encodedContentRuleList: blockRules) { (contentRuleList, error) in
-
+                            
                             if let error = error {
                                 print(error.localizedDescription)
                                 return
                             }
-
+                            
                             let configuration = self.webView!.configuration
                             configuration.userContentController.add(contentRuleList!)
-
+                            
                             self.load(initialUrl: initialUrl, initialFile: initialFile, initialData: initialData, initialHeaders: initialHeaders)
                     }
                     return
@@ -74,16 +68,8 @@ public class FlutterWebViewController: FlutterMethodCallDelegate, FlutterPlatfor
         load(initialUrl: initialUrl, initialFile: initialFile, initialData: initialData, initialHeaders: initialHeaders)
     }
     
-    deinit {
-        print("FlutterWebViewController - dealloc")
-        self.channel?.setMethodCallHandler(nil)
-        webView!.dispose()
-        webView = nil
-        myView = nil
-    }
-    
     public func view() -> UIView {
-        return myView!
+        return webView!
     }
     
     public func load(initialUrl: String, initialFile: String?, initialData: [String: String]?, initialHeaders: [String: String]) {
@@ -109,7 +95,7 @@ public class FlutterWebViewController: FlutterMethodCallDelegate, FlutterPlatfor
         }
     }
     
-    public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? NSDictionary
         switch call.method {
             case "getUrl":
@@ -344,31 +330,9 @@ public class FlutterWebViewController: FlutterMethodCallDelegate, FlutterPlatfor
                 }
                 result(true)
                 break
-            case "printCurrentPage":
-                if webView != nil {
-                    webView!.printCurrentPage(printCompletionHandler: {(completed, error) in
-                        if !completed, let e = error {
-                            result(false)
-                            return
-                        }
-                        result(true)
-                    })
-                    
-                } else {
-                    result(false)
-                }
-                break
-            case "getContentHeight":
-                result( (webView != nil) ? webView!.getContentHeight() : nil )
-                break
-            case "reloadFromOrigin":
-                if webView != nil {
-                    webView!.reloadFromOrigin()
-                }
+            case "removeFromSuperview":
+                webView!.removeFromSuperview()
                 result(true)
-                break
-            case "getScale":
-                result( (webView != nil) ? webView!.getScale() : nil )
                 break
             default:
                 result(FlutterMethodNotImplemented)
